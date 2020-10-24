@@ -1,29 +1,29 @@
-This website contains information, code and models from the paper [Robust And Interpretable Blind Image Denoising Via Bias-Free Convolutional Neural Networks](https://arxiv.org/abs/1906.05478) by [Sreyas Mohan](https://sreyas-mohan.github.io) \*, [Zahra Kadkhodaie](https://www.linkedin.com/in/zahra-kadkhodaie-1b415680) \*, [Eero P Simoncelli](https://www.cns.nyu.edu/~eero/) and [Carlos Fernandez-Granda](https://cims.nyu.edu/~cfgranda/) [\* equal contribution], presented/published at the International Conference on Learning Representations (ICLR), April 2020.
+This website contains information, code, models and dataset from the paper [Deep Denoising for Scientific Discovery: A Case Study in Electron Microscopy](https://openreview.net/pdf?id=TRgh1LjcBvt).
 
-Deep Convolutional Neural Networks have produced state-of-the-art results in the problem of removing noise from images. These networks do not generalize well to noise levels beyond the range on which they are trained. But removing the additive bias terms from the networks allows robust generalization, even when the network is trained only on barely-visible levels of noise. In addition, the removal of bias simplifies analysis of network behavior, which indicates that these denoisers perform projections onto local adaptively-estimated subspaces, whose dimensionality varies inversely with noise level.
+Denoising is a fundamental challenge in scientific imaging. Deep convolutional neural networks (CNNs) provide the current state of the art in denoising natural images, where they produce impressive results. However, their potential has barely been explored in the context of scientific imaging. Denoising CNNs are typically trained on real natural images artificially corrupted with simulated noise. In contrast, in scientific applications, noiseless ground-truth images are usually not available. To address this issue, we propose a simulation-based denoising (SBD) framework, in which CNNs are trained on simulated images. We test the framework on data obtained from transmission electron microscopy (TEM), an imaging technique with widespread applications in material science, biology, and medicine. SBD outperforms existing techniques by a wide margin on a simulated benchmark dataset, as well as on real data. Apart from the denoised images, SBD generates likelihood maps to visualize the agreement between the structure of the denoised image and the observed data. Our results reveal shortcomings of state-of-the-art denoising architectures, such as their small field-of-view. Through a gradient-based analysis, we show that substantially increasing the field-of-view of the CNNs allows them to exploit non-local periodic patterns in the data, which is crucial at high noise levels. In addition, we perform a thorough analysis of the generalization capability of SBD, demonstrating that the trained networks are robust to variations of imaging parameters and of the underlying signal structure. Finally, we release the first publicly available benchmark dataset of TEM images, containing 18,000 examples.
 
-## Bias-Free Networks Generalize Across Noise Levels
+## Dataset
+![dataset](./figures/dataset.png) 
+**Summary of parameters considered during the modelling and image simulation processes.** Subset of Pt/CeO$_2$ atomic models presenting variations on the (a) structure and shape of the nanoparticle and the support, (b) the thickness of the CeO$_2$ slab and (c) the tilt of the atomic models. Color code for the models matches Pt, Ce and O with grey, yellow and red atoms respectively. (d) Simulated images under different defocus values.
 
-We construct a *bias- free* CNN (BF-CNN) from a given CNN by removing additive (bias) terms from every stage of the network (including BatchNorm layers). The figure below shows the denoising of an example natural image by a CNN and its bias-free counterpart (BF-CNN), both trained over noise levels in the range [0, 10] (image intensities are in the range [0, 255]). The CNN performs poorly at high noise levels (90, far beyond the training range), whereas BF-CNN performs at state-of-the-art levels.
-![generalization](./figures/pigeon_gen.png) 
-![generalization](./figures/all_denoised.gif) 
-Since bias-free networks do not have additive constants, they are locally linear. We perform a local analysis of BF-CNN networks, which reveals the underlying denoising mechanisms learned from the data.
+## Our Result
 
-## Bias-Free Networks Implements Non-Linear Adaptive Filtering
+![result](./figures/result.png) 
+**Denoising results for real data** (a) An atomic-resolution electron-microscope image of a platinum nanoparticle obtained via transmission electron microscopy at a magnification of over one million, as described in Section~\ref{sec:dataset}. The average image intensity is 0.45 electrons/pixel (i.e. a large fraction of pixels represent zero electrons!), which results in an extremely low signal-to-noise ratio. (b) Denoised image obtained via Fourier-based filtering by a domain expert. (c) Denoised image obtained via the wavelet-based PURE-LET method~\citep{luisier2010image}. (d) Denoised image obtained by the proposed Simulation-Based Denoising framework.
 
-Locally, BF-CNN is linear and hence the each denoised pixel is computed as a weighted average of noisy pixels in the neighbourhood. The images in the three rightmost columns show the weighting functions used to compute each of the indicated pixels (red squares). Their shapes vary substantially, and are adapted to the underlying image content. As the noise level increases, the spatial extent of the weight functions increases in order to average out the noise, while respecting boundaries between different regions in the image, which results in dramatically different functions for each pixel.
+## Simulation Based Denoising Framework
 
-![filters](./figures/tree_filters.png) 
+![sbd](./figures/sbd.png) 
+**Simulation-based denoising framework**. (Top) A training dataset is generated by simulating images with different structures at varying imaging conditions. (Middle) A CNN is trained using the simulated images, paired with noisy counterparts obtained by simulating the relevant noise process. (Bottom) The trained CNN is applied to real data to yield a denoised image. After analyzing the image to extract structure of interest, a likelihood map is generated to quantify the agreement between this structure and the noisy data.
 
-## Bias-Free Networks Implements Projection Onto Low Dimensional Adaptive Subspaces
+## Likelihood Maps and Jacobian
 
-The local linear structure of a BF-CNN facilitates analysis of its functional capabilities via the singular value decomposition (SVD). Analyzing the SVD of a BF-CNN we emprically observe the local linear mapping is very low dimensional and  (approximately) symmetric and thus, the network is projecting the noisy signal onto a low-dimensional subspace. This is confirmed by visualizing the singular vectors as images as shown below. The singular vectors corresponding to non-negligible singular values (the first three columns) are seen to capture features of the input image; those corresponding to near-zero singular values (the last three columns) are unstructured.
-![filters](./figures/svd_vecs.png) 
+![jacobian](./figures/jacobian.png) 
+**Gradient analysis of the learned denoising function.** (a) To compute the red pixel in the denoised image (b), the proposed CNN uses a $220 \times 220$ area (red box) in the noisy image (a). The gradient of the denoised pixel with respect to its input indicates what regions in the noisy image have a greater influence on the estimate (according to a first-order Taylor approximation to the denoising map). The gradient (d) weights nearby pixels more heavily, but also has significant magnitude at pixels located on different atoms. This suggests that the CNN combines local and non-local information to estimate the pixel. See the paper for additional examples using real data.
+
+![likelihood](./figures/likelihood.png) 
+**Likelihood Maps** When the simulated noisy image in (a) is denoised using the proposed framework (b), a spurious atom appears at the left edge of the nanoparticle (see zoomed image (d)). The likelihood map (c) at that location is negative, which indicates that the presence of an atom is less likely than its absence according to the observed data.
 
 ## Pre-Trained Models and Code
-Please visit [our github page](https://labforcomputationalvision.github.io/bias_free_denoising/) for pre-trained models, code and instructions on how to use the code. 
+Please visit [our github page](https://github.com/sreyas-mohan/electron-microscopy-denoising) for pre-trained models, code and instructions on how to use the code. 
 
-## More Resources:
-* [Paper and reviews](https://openreview.net/forum?id=HJlSmC4FPS)
-* [Local copy of paper](https://www.cns.nyu.edu/~lcv/pubs/makeAbs.php?loc=MohanKadkhodaie19b)
-* [Conference video and slides](https://iclr.cc/virtual/poster_HJlSmC4FPS.html)
