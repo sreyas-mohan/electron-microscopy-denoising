@@ -6,10 +6,12 @@ Denoising is a fundamental challenge in scientific imaging. Deep convolutional n
 ![dataset](./figures/dataset.png) 
 **Summary of parameters considered during the modelling and image simulation processes.** Subset of Pt/CeO2 atomic models presenting variations on the (a) structure and shape of the nanoparticle and the support, (b) the thickness of the CeO2 slab and (c) the tilt of the atomic models. Color code for the models matches Pt, Ce and O with grey, yellow and red atoms respectively. (d) Simulated images under different defocus values.
 
+Please visit [our github page](https://github.com/sreyas-mohan/electron-microscopy-denoising) for instructions to download the dataset.
+
 ## Results
 
 ![result](./figures/result.png) 
-**Denoising results for real data** (a) An atomic-resolution electron-microscope image of a platinum nanoparticle obtained via transmission electron microscopy at a magnification of over one million. The average image intensity is 0.45 electrons/pixel (i.e. a large fraction of pixels represent zero electrons!), which results in an extremely low signal-to-noise ratio. (b) Denoised image obtained via Fourier-based filtering by a domain expert. (c) Denoised image obtained via the wavelet-based PURE-LET method. (d) Denoised image obtained by the proposed Simulation-Based Denoising framework.
+**Denoising results for real data** (a) An atomic-resolution electron-microscope image of a platinum nanoparticle obtained via transmission electron microscopy at a magnification of over one million. The average image intensity is 0.45 electrons/pixel (i.e. a large fraction of pixels represent zero electrons!), which results in a very low signal-to-noise ratio. (b) The denoised image obtained via Fourier-based filtering by a domain expert has very strong periodic artifacts. (c) The denoised image obtained via the wavelet-based PURE-LET method does not recover the surface of the nanoparticle. (d) In contrast, the denoised image obtained by our method restores the surface structure of the nanoparticle without adding periodic artifacts.
 
 ## Simulation Based Denoising Framework
 
@@ -19,11 +21,11 @@ Denoising is a fundamental challenge in scientific imaging. Deep convolutional n
 ## Interpretability
 
 ![jacobian](./figures/jacobian.png) 
-**Gradient analysis of the learned denoising function.** (a) To compute the red pixel in the denoised image (b), the proposed CNN uses a $220 \times 220$ area (red box) in the noisy image (a). The gradient of the denoised pixel with respect to its input indicates what regions in the noisy image have a greater influence on the estimate (according to a first-order Taylor approximation to the denoising map). The gradient (d) weights nearby pixels more heavily, but also has significant magnitude at pixels located on different atoms. This suggests that the CNN combines local and non-local information to estimate the pixel. See the paper for additional examples using real data.
+**Interpretability via Gradient Visualization.**  The proposed methodology provides an interpretable visualization based on the gradient of the deep neural network used for noise reduction. Image (a) shows the noisy data. Image (b) shows the denoised image. Image (c) shows a zoomed depiction of the denoised image. Image (d) shows the gradient visualization, which indicates what regions in the noisy image have a greater influence on the estimate of that particular pixel. The gradient weights nearby pixels more heavily, but also has significant magnitude at pixels located on different atoms. This reveals the way in which the network combines local and non-local information to estimate the pixel.
 
 ![likelihood](./figures/likelihood.png) 
-**Likelihood Maps** When the simulated noisy image in (a) is denoised using the proposed framework (b), a spurious atom appears at the left edge of the nanoparticle (see zoomed image (d)). The likelihood map (c) at that location is negative, which indicates that the presence of an atom is less likely than its absence according to the observed data.
+**Uncertainty Quantification via Likelihood Maps.** The proposed methodology makes it possible to evaluate the consistency between the structure uncovered by the denoising process and the observed data. This is achieved by plotting a *likelihood map* corresponding to the difference in the log likelihood corresponding to two competing hypotheses about the underlying structure. In this example, we evaluate whether atomic columns are present or an artifact of the noise-reduction process. Denoising the simulated noisy image in (a) results in a spurious atom at the left edge of the nanoparticle, as shown in (b) and (d) (the spurious atom is marked with an arrow). However, the likelihood map (c) at that location is negative, which indicates that the presence of an atom is less likely than its absence according to the observed data.
 
 ## Pre-Trained Models and Code
-Please visit [our github page](https://github.com/sreyas-mohan/electron-microscopy-denoising) for pre-trained models, code and instructions on how to use the code. 
+Please visit [our github page](https://github.com/sreyas-mohan/electron-microscopy-denoising) for dataset, pre-trained models, code and instructions on how to use the code. 
 
